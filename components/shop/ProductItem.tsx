@@ -21,18 +21,21 @@ const ProductItem = (props: IProps) => {
       <View style={styles.touchable}>
         <TouchableComponent onPress={props.onViewDetail} useForeground>
           <View style={styles.imageContainer}>
-            <Image style={styles.image} source={{ uri: props.product.imageUrl }} />
+            <Image
+              style={styles.image}
+              resizeMode='contain'
+              source={{ uri: props.product.imageUrl }}
+            />
           </View>
           <View style={styles.details}>
             <Text style={styles.title}>{props.product.title}</Text>
             <Text style={styles.price}>${props.product.price.toFixed(2)}</Text>
           </View>
-
-          <View style={styles.actions}>
-            <Button color={Color.primary} title='View Details' onPress={props.onViewDetail} />
-            <Button color={Color.primary} title='To Cart' onPress={props.onAddToCart} />
-          </View>
         </TouchableComponent>
+        <View style={styles.actions}>
+          <Button color={Color.primary} title='View Details' onPress={props.onViewDetail} />
+          <Button color={Color.primary} title='To Cart' onPress={props.onAddToCart} />
+        </View>
       </View>
     </View>
   );
@@ -47,8 +50,8 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderRadius: 10,
     backgroundColor: 'white',
-    height: 300,
     margin: 20,
+    paddingBottom: 20,
   },
   touchable: {
     borderRadius: 10,
@@ -56,7 +59,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: '100%',
+    height: 200,
   },
   title: {
     fontFamily: 'open-sans-bold',
@@ -72,17 +75,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: '25%',
     paddingHorizontal: 20,
   },
   details: {
     alignItems: 'center',
-    height: '15%',
     padding: 10,
   },
   imageContainer: {
     width: '100%',
-    height: '60%',
+    // height: '60%',
     overflow: 'hidden',
     borderTopLeftRadius: 10,
     borderTopEndRadius: 10,
