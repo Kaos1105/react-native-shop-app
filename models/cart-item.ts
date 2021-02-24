@@ -13,7 +13,7 @@ class CartItemModel {
 
 export interface CartItemMap {
   key: string;
-  value: CartItemModel
+  value: CartItemModel;
 }
 
-export default CartItemModel
+export default CartItemModel;

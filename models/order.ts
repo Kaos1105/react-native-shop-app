@@ -1,4 +1,5 @@
-import CartItemModel, { CartItemMap } from "./cart-item";
+import { CartItemMap } from './cart-item';
+import { format } from 'date-fns';
 
 class Order {
   id: string;
@@ -10,6 +11,10 @@ class Order {
     this.item = items;
     this.totalAmount = totalAmount;
     this.date = date;
+  }
+
+  get readableDate() {
+    return format(this.date, 'dd/MM/yyyy HH:mm');
   }
 }
 export default Order;

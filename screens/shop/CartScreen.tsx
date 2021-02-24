@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import { NavigationParams, NavigationScreenProp, NavigationState } from 'react-navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../App';
 import CartItem from '../../components/shop/CartItem';
 import Color from '../../constants/Color';
 import * as cartActions from '../../store/actions/cart';
 import * as ordersActions from '../../store/actions/orders';
+
+interface IProps {
+  navigation: NavigationScreenProp<NavigationState, NavigationParams>;
+}
 
 const CartScreen = (prop) => {
   const cartTotalAmount = useSelector((state: RootState) => state.cart.totalAmount);
@@ -44,6 +49,12 @@ const CartScreen = (prop) => {
       />
     </View>
   );
+};
+
+CartScreen.navigationOptions = (navData: IProps) => {
+  return {
+    headerTitle: 'Your Cart',
+  };
 };
 
 const styles = StyleSheet.create({
