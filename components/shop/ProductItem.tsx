@@ -6,8 +6,8 @@ import Product from '../../models/product';
 
 interface IProps {
   product: Product;
-  onViewDetail: () => void;
-  onAddToCart: () => void;
+  onSelect: () => void;
+  children?: React.ReactNode;
 }
 
 const ProductItem = (props: IProps) => {
@@ -19,7 +19,7 @@ const ProductItem = (props: IProps) => {
   return (
     <View style={styles.product}>
       <View style={styles.touchable}>
-        <TouchableComponent onPress={props.onViewDetail} useForeground>
+        <TouchableComponent onPress={props.onSelect} useForeground>
           <View style={styles.imageContainer}>
             <Image
               style={styles.image}
@@ -32,10 +32,7 @@ const ProductItem = (props: IProps) => {
             <Text style={styles.price}>${props.product.price.toFixed(2)}</Text>
           </View>
         </TouchableComponent>
-        <View style={styles.actions}>
-          <Button color={Color.primary} title='View Details' onPress={props.onViewDetail} />
-          <Button color={Color.primary} title='To Cart' onPress={props.onAddToCart} />
-        </View>
+        <View style={styles.actions}>{props.children}</View>
       </View>
     </View>
   );

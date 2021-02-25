@@ -3,12 +3,12 @@ import { format } from 'date-fns';
 
 class Order {
   id: string;
-  item: CartItemMap[];
+  items: CartItemMap[];
   totalAmount: number;
   date: Date;
   constructor(id: string, items: CartItemMap[], totalAmount: number, date: Date) {
     this.id = id;
-    this.item = items;
+    this.items = items;
     this.totalAmount = totalAmount;
     this.date = date;
   }
