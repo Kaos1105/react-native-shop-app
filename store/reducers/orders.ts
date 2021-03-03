@@ -1,11 +1,11 @@
 import Order from '../../models/order';
-import { ADD_ORDER, OrderActonType } from '../actions/orders';
+import { ADD_ORDER, OrderActionType } from '../actions/orders';
 
 const initialState = {
   items: new Map<string, Order>(),
 };
 
-export default (state = initialState, action: OrderActonType): typeof initialState => {
+export default (state = initialState, action: OrderActionType): typeof initialState => {
   switch (action.type) {
     case ADD_ORDER:
       const newOrder = new Order(

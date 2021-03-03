@@ -1,6 +1,7 @@
 import CartItemModel from '../../models/cart-item';
 import { ADD_TO_CART, REMOTE_FROM_CART, CartActionType } from '../actions/cart';
-import { ADD_ORDER, OrderActonType } from '../actions/orders';
+import { ADD_ORDER, OrderActionType } from '../actions/orders';
+import { DELETE_PRODUCT, ProductActionType } from '../actions/products';
 
 // interface ReturnState {
 //   items: Map<string, CartItemModel>,
@@ -14,7 +15,7 @@ const initialState = {
 
 export default (
   state = initialState,
-  action: CartActionType | OrderActonType
+  action: CartActionType | OrderActionType | ProductActionType
 ): typeof initialState => {
   switch (action.type) {
     case ADD_TO_CART:
@@ -67,6 +68,18 @@ export default (
 
     case ADD_ORDER:
       return initialState;
+    case DELETE_PRODUCT:
+      const deletedItem = state.items.get(action.productId);
+      if (!deletedItem) {
+        break;
+      }
+      updatedCartItems = new Map(state.items);
+      updatedCartItems.delete(action.productId);
+      return {
+        ...state,
+        items: updatedCartItems,
+        totalAmount: state.totalAmount - deletedItem.sum,
+      };
   }
   return state;
 };

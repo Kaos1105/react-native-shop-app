@@ -10,7 +10,7 @@ interface AddOrderAction {
   };
 }
 
-export type OrderActonType = AddOrderAction;
+export type OrderActionType = AddOrderAction;
 
 export const addOrder = (cartItems: CartItemMap[], totalAmount: number): AddOrderAction => {
   return { type: ADD_ORDER, orderData: { items: cartItems, amount: totalAmount } };
