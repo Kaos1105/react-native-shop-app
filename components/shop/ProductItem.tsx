@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, Image, Text, Button, Platform } from 'react-native';
+import { View, StyleSheet, Image, Text, Platform } from 'react-native';
 import { TouchableNativeFeedback, TouchableOpacity } from 'react-native-gesture-handler';
-import Color from '../../constants/Color';
 import Product from '../../models/product';
+import Card from '../UI/Card';
 
 interface IProps {
   product: Product;
@@ -17,7 +17,7 @@ const ProductItem = (props: IProps) => {
   }
 
   return (
-    <View style={styles.product}>
+    <Card style={styles.product}>
       <View style={styles.touchable}>
         <TouchableComponent onPress={props.onSelect} useForeground>
           <View style={styles.imageContainer}>
@@ -34,19 +34,12 @@ const ProductItem = (props: IProps) => {
         </TouchableComponent>
         <View style={styles.actions}>{props.children}</View>
       </View>
-    </View>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
   product: {
-    shadowColor: 'black',
-    shadowOpacity: 0.26,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 5,
-    borderRadius: 10,
-    backgroundColor: 'white',
     margin: 20,
     paddingBottom: 20,
   },

@@ -3,12 +3,13 @@ import { View, ScrollView, Text, StyleSheet, Platform } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { NavigationParams, NavigationScreenProp, NavigationState } from 'react-navigation';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
-import { Formik, useFormikContext } from 'formik';
+import { useFormik } from 'formik';
 import CustomHeaderButton from '../../components/UI/HeaderButton';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../App';
 import { useCallback } from 'react';
 import { useEffect } from 'react';
+import * as productActions from '../../store/actions/products';
 
 interface IProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -19,75 +20,90 @@ const EditProductScreen = (props: IProps) => {
   const editProduct = useSelector((state: RootState) =>
     state.products.userProducts.find((prod) => prod.id === prodId)
   );
-  const { handleSubmit } = useFormikContext();
+
+  const dispatch = useDispatch();
+
+  const formik = useFormik({
+    initialValues: editProduct
+      ? {
+          title: editProduct.title,
+          imageURL: editProduct.imageUrl,
+          description: editProduct.description,
+          price: editProduct.price,
+        }
+      : { title: '', imageURL: '', description: '', price: 0 },
+    onSubmit: (values) => {
+      if (editProduct) {
+        dispatch(
+          productActions.updateProduct(prodId, values.title, values.description, values.imageURL)
+        );
+      } else {
+        dispatch(
+          productActions.createProduct(
+            values.title,
+            values.description,
+            values.imageURL,
+            +values.price
+          )
+        );
+      }
+      props.navigation.goBack();
+    },
+  });
+
   const submitHandler = useCallback(() => {
-    handleSubmit();
+    formik.handleSubmit();
   }, []);
 
   useEffect(() => {
     props.navigation.setParams({ submit: submitHandler });
-  }, [submitHandler]);
+  }, []);
 
   return (
-    <Formik
-      initialValues={
-        editProduct
-          ? {
-              title: editProduct.title,
-              imageURL: editProduct.imageUrl,
-              description: editProduct.description,
-              price: editProduct.price,
-            }
-          : { title: '', imageURL: '', description: '', price: 0 }
-      }
-      onSubmit={(values) => console.log(values)}
-    >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
-        <ScrollView>
-          <View style={styles.form}>
-            <View style={styles.formControl}>
-              <Text style={styles.label}>Title</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('title')}
-                onBlur={handleBlur('title')}
-                value={values.title}
-              />
-            </View>
-            <View style={styles.formControl}>
-              <Text style={styles.label}>Image URL</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('imageURL')}
-                onBlur={handleBlur('imageURL')}
-                value={values.imageURL}
-              />
-            </View>
-            {!editProduct && (
-              <View style={styles.formControl}>
-                <Text style={styles.label}>Price</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={handleChange('price')}
-                  onBlur={handleBlur('price')}
-                  value={values.price.toString()}
-                />
-              </View>
-            )}
-
-            <View style={styles.formControl}>
-              <Text style={styles.label}>Description</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('description')}
-                onBlur={handleBlur('description')}
-                value={values.description}
-              />
-            </View>
+    <ScrollView>
+      <View style={styles.form}>
+        <View style={styles.formControl}>
+          <Text style={styles.label}>Title</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={formik.handleChange('title')}
+            // onChange={formik.handleChange}
+            onBlur={formik.handleBlur('title')}
+            value={formik.values.title}
+          />
+        </View>
+        <View style={styles.formControl}>
+          <Text style={styles.label}>Image URL</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={formik.handleChange('imageURL')}
+            onBlur={formik.handleBlur('imageURL')}
+            value={formik.values.imageURL}
+          />
+        </View>
+        {!editProduct && (
+          <View style={styles.formControl}>
+            <Text style={styles.label}>Price</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={formik.handleChange('price')}
+              onBlur={formik.handleBlur('price')}
+              value={formik.values.price.toString()}
+            />
           </View>
-        </ScrollView>
-      )}
-    </Formik>
+        )}
+
+        <View style={styles.formControl}>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={formik.handleChange('description')}
+            onBlur={formik.handleBlur('description')}
+            value={formik.values.description}
+          />
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
