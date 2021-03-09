@@ -120,16 +120,11 @@ const EditProductScreen = (props: IProps) => {
   }, [submitHandler]);
 
   const inputChangeHandler = useCallback(
-    (inputIdentifier: string, text: string) => {
-      let isValid = false;
-      if (text.trim().length > 0) {
-        isValid = true;
-      }
-
+    (inputIdentifier: string, inputValue: string, inputValidity: boolean) => {
       dispatchFormState({
         type: FORM_INPUT_UPDATE,
-        value: text,
-        isValid: isValid,
+        value: inputValue,
+        isValid: inputValidity,
         input: inputIdentifier,
       });
     },
@@ -154,33 +149,52 @@ const EditProductScreen = (props: IProps) => {
         </View> */}
         <Input
           label='Title'
+          id='title'
           errorText='Please enter a valid title!'
           keyboardType='default'
           autoCapitalize='sentences'
           returnKeyType='next'
+          onInputChange={inputChangeHandler}
+          required
+          initialValue={editedProduct ? editedProduct.title : ''}
+          initialValidity={!!editedProduct}
         />
         <Input
           label='Image Url'
+          id='imageUrl'
           errorText='Please enter a valid image url!'
           keyboardType='default'
           returnKeyType='next'
+          onInputChange={inputChangeHandler}
+          initialValue={editedProduct ? editedProduct.imageUrl : ''}
+          initialValidity={!!editedProduct}
+          required
         />
         {!editedProduct && (
           <Input
+            id='price'
             label='Price'
             errorText='Please enter a valid price!'
             keyboardType='decimal-pad'
             returnKeyType='next'
+            min={0}
+            onInputChange={inputChangeHandler}
           />
         )}
 
         <Input
+          id='description'
           label='Description'
           errorText='Please enter a valid Description'
           keyboardType='default'
           autoCapitalize='sentences'
           multiline
           numberOfLines={3}
+          initialValue={editedProduct ? editedProduct.description : ''}
+          initialValidity={!!editedProduct}
+          required
+          minLength={5}
+          onInputChange={inputChangeHandler}
         />
       </View>
     </ScrollView>

@@ -1,23 +1,44 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
 
 interface IProps extends TextInputProps {
   label: string;
+  id: string;
   errorText: string;
-  initialValue: string;
-  initialValidity: boolean;
-  required: boolean;
-  email: boolean;
+  initialValue?: string;
+  initialValidity?: boolean;
+  required?: boolean;
+  email?: boolean;
   min?: number;
   max?: number;
   minLength?: number;
+  onInputChange(id: string, value: string, isValid: boolean): void;
 }
 
 const INPUT_CHANGE = 'INPUT_CHANGE';
+const INPUT_BLUR = 'INPUT_BLUE';
 
-const inputReducer = (state, action) => {
+interface InputState {
+  value: string;
+  isValid: boolean;
+  touched: boolean;
+}
+
+interface InputAction {
+  type: typeof INPUT_CHANGE | typeof INPUT_BLUR;
+  value?: string;
+  isValid?: boolean;
+}
+
+const inputReducer = (state: InputState, action: InputAction) => {
   switch (action.type) {
     case INPUT_CHANGE:
+      return { ...state, value: action.value, isValid: action.isValid };
+    case INPUT_BLUR:
+      return {
+        ...state,
+        touched: true,
+      };
     default:
       return state;
   }
@@ -29,6 +50,10 @@ const Input = (props: IProps) => {
     isValid: props.initialValidity,
     touched: false,
   });
+
+  useEffect(() => {
+    if (inputState.touched) props.onInputChange(props.id, inputState.value, inputState.isValid);
+  }, [inputState, props.onInputChange, props.id]);
 
   const textChangeHandler = (text: string) => {
     const emailRegex = /^([A-Za-z0-9_\-\.]){1,}\@([A-Za-z0-9_\-\.]){1,}\.([A-Za-z]){2,4}$/;
@@ -42,7 +67,11 @@ const Input = (props: IProps) => {
     ) {
       isValid = false;
     }
-    dispatch({ type: INPUT_CHANGE, value: text });
+    dispatch({ type: INPUT_CHANGE, value: text, isValid: isValid });
+  };
+
+  const lostFocusHandler = () => {
+    dispatch({ type: INPUT_BLUR });
   };
 
   return (
@@ -51,13 +80,14 @@ const Input = (props: IProps) => {
       <TextInput
         {...props}
         style={styles.input}
-        onChangeText={inputChangeHandler.bind(this, 'title')}
-        value={formState.inputValues.title}
+        onChangeText={textChangeHandler}
+        onBlur={lostFocusHandler}
+        value={inputState.value}
         // keyboardType='default'
         // autoCapitalize='sentences'
         // returnKeyType='next'
       />
-      {!fromState.inputValidities.title && <Text>{props.errorText}</Text>}
+      {!inputState.isValid && <Text>{props.errorText}</Text>}
     </View>
   );
 };
