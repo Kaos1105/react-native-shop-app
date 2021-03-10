@@ -56,13 +56,14 @@ const Input = (props: IProps) => {
   }, [inputState, props.onInputChange, props.id]);
 
   const textChangeHandler = (text: string) => {
+    // eslint-disable-next-line no-useless-escape
     const emailRegex = /^([A-Za-z0-9_\-\.]){1,}\@([A-Za-z0-9_\-\.]){1,}\.([A-Za-z]){2,4}$/;
     let isValid = true;
     if (
       (props.required && text.trim().length === 0) ||
       (props.email && !emailRegex.test(text.toLowerCase())) ||
       (props.min != null && +text < props.min) ||
-      (props.max != null && +text > props.min) ||
+      (props.max != null && +text > props.min!) ||
       (props.minLength != null && text.length < props.minLength)
     ) {
       isValid = false;
@@ -87,7 +88,11 @@ const Input = (props: IProps) => {
         // autoCapitalize='sentences'
         // returnKeyType='next'
       />
-      {!inputState.isValid && <Text>{props.errorText}</Text>}
+      {!inputState.isValid && inputState.touched && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{props.errorText}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -104,6 +109,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   formControl: { width: '100%' },
+  errorContainer: {
+    marginVertical: 5,
+  },
+  errorText: {
+    fontFamily: 'open-sans',
+    color: 'red',
+    fontSize: 13,
+  },
 });
 
 export default Input;

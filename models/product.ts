@@ -8,7 +8,14 @@ interface IProduct {
 }
 
 class Product implements IProduct {
-  constructor(id, ownerId, title, imageUrl, description, price) {
+  constructor(
+    id: string,
+    ownerId: string,
+    title: string,
+    imageUrl: string,
+    description: string,
+    price: number
+  ) {
     this.id = id;
     this.ownerId = ownerId;
     this.title = title;

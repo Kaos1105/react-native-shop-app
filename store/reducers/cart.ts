@@ -28,10 +28,10 @@ export default (
       if (state.items.has(addedProduct.id)) {
         //already have item in the cart
         updatedOrNewCartItem = new CartItemModel(
-          state.items.get(addedProduct.id).quantity + 1,
+          state.items.get(addedProduct.id)!.quantity + 1,
           productPrice,
           prodTitle,
-          state.items.get(addedProduct.id).sum + productPrice
+          state.items.get(addedProduct.id)!.sum + productPrice
         );
       } else {
         updatedOrNewCartItem = new CartItemModel(1, productPrice, prodTitle, productPrice);
@@ -45,15 +45,15 @@ export default (
 
     case REMOTE_FROM_CART:
       const selectedCartItem = state.items.get(action.productId);
-      const currentQty = selectedCartItem.quantity;
+      const currentQty = selectedCartItem!.quantity;
       updatedCartItems = new Map(state.items);
       if (currentQty > 1) {
         //reduce by one
         const updatedCartItem = new CartItemModel(
-          selectedCartItem.quantity - 1,
-          selectedCartItem.productPrice,
-          selectedCartItem.productTitle,
-          selectedCartItem.sum - selectedCartItem.productPrice
+          selectedCartItem!.quantity - 1,
+          selectedCartItem!.productPrice,
+          selectedCartItem!.productTitle,
+          selectedCartItem!.sum - selectedCartItem!.productPrice
         );
         updatedCartItems.set(action.productId, updatedCartItem);
       } else {
@@ -63,7 +63,7 @@ export default (
       return {
         ...state,
         items: updatedCartItems,
-        totalAmount: state.totalAmount - selectedCartItem.productPrice,
+        totalAmount: state.totalAmount - selectedCartItem!.productPrice,
       };
 
     case ADD_ORDER:
