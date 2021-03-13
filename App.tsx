@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { createStore, combineReducers, applyMiddleware } from 'redux';
+import { createStore, combineReducers, applyMiddleware, Action } from 'redux';
 import { Provider } from 'react-redux';
 import AppLoading from 'expo-app-loading';
 import * as Font from 'expo-font';
 //import { composeWithDevTools } from 'redux-devtools-extension';
-import ReduxThunk from 'redux-thunk';
+import ReduxThunk, { ThunkAction } from 'redux-thunk';
 
 import productsReducer from './store/reducers/products';
 import cartReducer from './store/reducers/cart';
@@ -27,6 +27,12 @@ const fetchFonts = () => {
 };
 
 export type RootState = ReturnType<typeof rootReducer>;
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
+>;
 
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);

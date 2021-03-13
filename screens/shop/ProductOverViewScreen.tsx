@@ -1,28 +1,57 @@
-import React from 'react';
-import { Button, FlatList, Platform, Text } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Button,
+  FlatList,
+  Platform,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  Text,
+} from 'react-native';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../App';
 import ProductItem from '../../components/shop/ProductItem';
-import {
-  NavigationParams,
-  NavigationProp,
-  NavigationScreenProp,
-  NavigationState,
-} from 'react-navigation';
+import { NavigationParams, NavigationScreenProp, NavigationState } from 'react-navigation';
 
 import * as cartActions from '../../store/actions/cart';
-import { HeaderButton, HeaderButtons, Item } from 'react-navigation-header-buttons';
+import * as productActions from '../../store/actions/products';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../../components/UI/HeaderButton';
 import Color from '../../constants/Color';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 interface IProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
 }
 
 const ProductOverviewScreen = (props: IProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const products = useSelector((state: RootState) => state.products.availableProducts);
   const dispatch = useDispatch();
+
+  const loadProducts = useCallback(async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(productActions.fetchProducts());
+    } catch (err) {
+      setError(err.message);
+    }
+    setIsLoading(false);
+  }, [dispatch]);
+
+  useEffect(() => {
+    const willFocusSub = props.navigation.addListener('willFocus', loadProducts);
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadProducts]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [dispatch, loadProducts]);
 
   const selectItemHandler = (id: string, title: string) => {
     props.navigation.navigate({
@@ -30,6 +59,31 @@ const ProductOverviewScreen = (props: IProps) => {
       params: { productId: id, productTitle: title },
     });
   };
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text>An Error occurred!</Text>
+        <Button title='Try again' onPress={loadProducts} color={Color.primary} />
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size='large' color={Color.primary} />
+      </View>
+    );
+  }
+
+  if (!isLoading && products.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text>No products found. Maybe start adding some!</Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList
@@ -87,5 +141,9 @@ ProductOverviewScreen.navigationOptions = (navData: IProps) => {
     ),
   };
 };
+
+const styles = StyleSheet.create({
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});
 
 export default ProductOverviewScreen;
