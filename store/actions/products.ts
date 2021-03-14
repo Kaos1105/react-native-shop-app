@@ -80,8 +80,19 @@ export const fetchProducts = (): AppThunk<void> => {
   };
 };
 
-export const deleteProduct = (productId: string): DeleteProductAction => {
-  return { type: DELETE_PRODUCT, productId: productId };
+export const deleteProduct = (productId: string): AppThunk => {
+  return async (dispatch) => {
+    const response = await fetch(
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products/${productId}.json`,
+      {
+        method: 'DELETE',
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Delete failed');
+    }
+    dispatch({ type: DELETE_PRODUCT, productId: productId });
+  };
 };
 
 export const createProduct = (
@@ -124,6 +135,26 @@ export const updateProduct = (
   title: string,
   description: string,
   imageUrl: string
-): UpdateProductAction => {
-  return { type: UPDATE_PRODUCT, pid: id, productData: { title, description, imageUrl } };
+): AppThunk => {
+  return async (dispatch) => {
+    const response = await fetch(
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products/${id}.json`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          imageUrl,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Update failed');
+    }
+    dispatch({ type: UPDATE_PRODUCT, pid: id, productData: { title, description, imageUrl } });
+  };
 };

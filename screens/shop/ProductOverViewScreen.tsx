@@ -19,7 +19,7 @@ import * as productActions from '../../store/actions/products';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../../components/UI/HeaderButton';
 import Color from '../../constants/Color';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import Loading from '../../components/UI/Loading';
 
 interface IProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -27,20 +27,21 @@ interface IProps {
 
 const ProductOverviewScreen = (props: IProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const products = useSelector((state: RootState) => state.products.availableProducts);
   const dispatch = useDispatch();
 
   const loadProducts = useCallback(async () => {
     setError(null);
-    setIsLoading(true);
+    setIsRefreshing(true);
     try {
       await dispatch(productActions.fetchProducts());
     } catch (err) {
       setError(err.message);
     }
-    setIsLoading(false);
-  }, [dispatch]);
+    setIsRefreshing(false);
+  }, [dispatch, setError, setIsLoading]);
 
   useEffect(() => {
     const willFocusSub = props.navigation.addListener('willFocus', loadProducts);
@@ -50,7 +51,10 @@ const ProductOverviewScreen = (props: IProps) => {
   }, [loadProducts]);
 
   useEffect(() => {
-    loadProducts();
+    setIsLoading(true);
+    loadProducts().then(() => {
+      setIsLoading(false);
+    });
   }, [dispatch, loadProducts]);
 
   const selectItemHandler = (id: string, title: string) => {
@@ -70,11 +74,7 @@ const ProductOverviewScreen = (props: IProps) => {
   }
 
   if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size='large' color={Color.primary} />
-      </View>
-    );
+    return <Loading />;
   }
 
   if (!isLoading && products.length === 0) {
@@ -87,6 +87,8 @@ const ProductOverviewScreen = (props: IProps) => {
 
   return (
     <FlatList
+      onRefresh={loadProducts}
+      refreshing={isRefreshing}
       data={products}
       keyExtractor={(item) => item.id}
       renderItem={(itemData) => (

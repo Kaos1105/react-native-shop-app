@@ -1,5 +1,13 @@
-import React, { useReducer } from 'react';
-import { View, ScrollView, StyleSheet, Platform, Alert, KeyboardAvoidingView } from 'react-native';
+import React, { useReducer, useState } from 'react';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Platform,
+  Alert,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+} from 'react-native';
 import { NavigationParams, NavigationScreenProp, NavigationState } from 'react-navigation';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../../components/UI/HeaderButton';
@@ -9,6 +17,7 @@ import { useCallback } from 'react';
 import { useEffect } from 'react';
 import * as productActions from '../../store/actions/products';
 import Input from '../../components/UI/Input';
+import Color from '../../constants/Color';
 
 interface IProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -63,6 +72,9 @@ const formReducer = (state: FormState, action: FormStateAction) => {
 };
 
 const EditProductScreen = (props: IProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const prodId = props.navigation.getParam('productId');
   const editedProduct = useSelector((state: RootState) =>
     state.products.userProducts.find((prod) => prod.id === prodId)
@@ -86,31 +98,44 @@ const EditProductScreen = (props: IProps) => {
     formIsValid: editedProduct ? true : false,
   });
 
-  const submitHandler = useCallback(() => {
+  useEffect(() => {
+    if (error) {
+      Alert.alert('An error occurred:', error, [{ text: 'OK' }]);
+    }
+  }, [error]);
+
+  const submitHandler = useCallback(async () => {
     if (!formState.formIsValid) {
       Alert.alert('Wrong input!', 'Please check the errors in the form.', [{ text: 'Okay' }]);
       return;
     }
-    if (editedProduct) {
-      dispatch(
-        productActions.updateProduct(
-          prodId,
-          formState.inputValues.title,
-          formState.inputValues.description,
-          formState.inputValues.imageUrl
-        )
-      );
-    } else {
-      dispatch(
-        productActions.createProduct(
-          formState.inputValues.title,
-          formState.inputValues.description,
-          formState.inputValues.imageUrl,
-          +formState.inputValues.price
-        )
-      );
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (editedProduct) {
+        await dispatch(
+          productActions.updateProduct(
+            prodId,
+            formState.inputValues.title,
+            formState.inputValues.description,
+            formState.inputValues.imageUrl
+          )
+        );
+      } else {
+        await dispatch(
+          productActions.createProduct(
+            formState.inputValues.title,
+            formState.inputValues.description,
+            formState.inputValues.imageUrl,
+            +formState.inputValues.price
+          )
+        );
+      }
+      props.navigation.goBack();
+    } catch (err) {
+      setError(err.message);
     }
-    props.navigation.goBack();
+    setIsLoading(false);
   }, [dispatch, prodId, formState]);
 
   useEffect(() => {
@@ -129,23 +154,18 @@ const EditProductScreen = (props: IProps) => {
     [dispatchFormState]
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size='large' color={Color.primary} />
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' keyboardVerticalOffset={20}>
       <ScrollView>
         <View style={styles.form}>
-          {/* <View style={styles.formControl}>
-          <Text style={styles.label}>Title</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={inputChangeHandler.bind(this, 'title')}
-            // onChange={formik.handleChange}
-            //onBlur={formik.handleBlur('title')}
-            value={formState.inputValues.title}
-            keyboardType='default'
-            autoCapitalize='sentences'
-            returnKeyType='next'
-          />
-        </View> */}
           <Input
             label='Title'
             id='title'
@@ -219,6 +239,7 @@ EditProductScreen.navigationOptions = (navData: IProps) => {
 };
 
 const styles = StyleSheet.create({
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   form: {
     margin: 20,
   },

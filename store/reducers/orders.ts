@@ -1,5 +1,5 @@
 import Order from '../../models/order';
-import { ADD_ORDER, OrderActionType } from '../actions/orders';
+import { ADD_ORDER, OrderActionType, SET_ORDER } from '../actions/orders';
 
 const initialState = {
   items: new Map<string, Order>(),
@@ -9,12 +9,21 @@ export default (state = initialState, action: OrderActionType): typeof initialSt
   switch (action.type) {
     case ADD_ORDER:
       const newOrder = new Order(
-        new Date().toString(),
+        action.orderData.id,
         action.orderData.items,
         action.orderData.amount,
-        new Date()
+        action.orderData.date
       );
       return { ...state, items: state.items.set(newOrder.id, newOrder) };
+    case SET_ORDER:
+      let updatedOrders = new Map(state.items);
+      action.orders.forEach((order) => {
+        updatedOrders.set(order.id, order);
+      });
+      return {
+        ...state,
+        items: updatedOrders,
+      };
   }
   return state;
 };
