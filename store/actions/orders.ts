@@ -56,10 +56,11 @@ export const fetchOrder = (): AppThunk<void> => {
 };
 
 export const addOrder = (cartItems: CartItemMap[], totalAmount: number): AppThunk => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     const dateCreated = new Date();
+    const token = getState().auth.token;
     const response = await fetch(
-      'https://the-shop-app-a940e-default-rtdb.firebaseio.com/orders/u1.json',
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/orders/u1.json?auth=${token}`,
       {
         method: 'POST',
         headers: {

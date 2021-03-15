@@ -81,9 +81,10 @@ export const fetchProducts = (): AppThunk<void> => {
 };
 
 export const deleteProduct = (productId: string): AppThunk => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState().auth.token;
     const response = await fetch(
-      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products/${productId}.json`,
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products/${productId}.json?auth=${token}`,
       {
         method: 'DELETE',
       }
@@ -101,10 +102,11 @@ export const createProduct = (
   imageUrl: string,
   price: number
 ): AppThunk => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     //async code to server
+    const token = getState().auth.token;
     const response = await fetch(
-      'https://the-shop-app-a940e-default-rtdb.firebaseio.com/products.json',
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products.json?auth=${token}`,
       {
         method: 'POST',
         headers: {
@@ -136,9 +138,11 @@ export const updateProduct = (
   description: string,
   imageUrl: string
 ): AppThunk => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState().auth.token;
+    console.log(token);
     const response = await fetch(
-      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products/${id}.json`,
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products/${id}.json?auth=${token}`,
       {
         method: 'PATCH',
         headers: {
@@ -151,6 +155,9 @@ export const updateProduct = (
         }),
       }
     );
+
+    const resData = await response.json();
+    console.log(resData);
 
     if (!response.ok) {
       throw new Error('Update failed');
