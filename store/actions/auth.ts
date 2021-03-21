@@ -35,7 +35,6 @@ export const signUp = (email: string, password: string): AppThunk<void> => {
       );
 
       const resData = await response.json();
-      console.log(resData);
       if (!response.ok) {
         const errMess = resData.error.message;
         let message = 'Sign up failed';
@@ -74,7 +73,6 @@ export const logIn = (email: string, password: string): AppThunk<void> => {
       );
 
       const resData = await response.json();
-      console.log(resData);
       if (!response.ok) {
         const errMess = resData.error.message;
         let message = 'Something went wrong';

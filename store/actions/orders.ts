@@ -23,10 +23,11 @@ interface SetOrderAction {
 export type OrderActionType = AddOrderAction | SetOrderAction;
 
 export const fetchOrder = (): AppThunk<void> => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
     try {
       const response = await fetch(
-        'https://the-shop-app-a940e-default-rtdb.firebaseio.com/orders/u1.json'
+        `https://the-shop-app-a940e-default-rtdb.firebaseio.com/orders/${userId}.json`
       );
       if (!response.ok) {
         throw new Error('Fetch order failed');
@@ -34,6 +35,7 @@ export const fetchOrder = (): AppThunk<void> => {
       const resData = await response.json();
 
       const loadedOrders = [];
+      console.log(resData);
       for (const key in resData) {
         loadedOrders.push(
           new Order(
@@ -59,8 +61,10 @@ export const addOrder = (cartItems: CartItemMap[], totalAmount: number): AppThun
   return async (dispatch, getState) => {
     const dateCreated = new Date();
     const token = getState().auth.token;
+    const userId = getState().auth.userId;
+
     const response = await fetch(
-      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/orders/u1.json?auth=${token}`,
+      `https://the-shop-app-a940e-default-rtdb.firebaseio.com/orders/${userId}.json?auth=${token}`,
       {
         method: 'POST',
         headers: {

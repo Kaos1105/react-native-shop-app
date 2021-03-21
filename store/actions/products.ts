@@ -9,6 +9,7 @@ export const SET_PRODUCT = 'SET_PRODUCT';
 interface SetProductAction {
   type: typeof SET_PRODUCT;
   products: Array<Product>;
+  userProducts: Array<Product>;
 }
 
 interface DeleteProductAction {
@@ -24,6 +25,7 @@ interface CreateProductAction {
     description: string;
     imageUrl: string;
     price: number;
+    ownerId: string;
   };
 }
 
@@ -44,8 +46,9 @@ export type ProductActionType =
   | SetProductAction;
 
 export const fetchProducts = (): AppThunk<void> => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     //async code to server
+    const userId = getState().auth.userId;
     try {
       const response = await fetch(
         'https://the-shop-app-a940e-default-rtdb.firebaseio.com/products.json'
@@ -56,14 +59,13 @@ export const fetchProducts = (): AppThunk<void> => {
       }
 
       const resData = await response.json();
-      console.log(resData);
 
       const loadedProducts = new Array<Product>();
       for (const key in resData) {
         loadedProducts.push(
           new Product(
             key,
-            'u1',
+            resData[key].ownerId,
             resData[key].title,
             resData[key].imageUrl,
             resData[key].description,
@@ -72,7 +74,11 @@ export const fetchProducts = (): AppThunk<void> => {
         );
       }
 
-      dispatch({ type: SET_PRODUCT, products: loadedProducts });
+      dispatch({
+        type: SET_PRODUCT,
+        products: loadedProducts,
+        userProducts: loadedProducts.filter((prod) => prod.ownerId === userId),
+      });
     } catch (err) {
       //show err
       throw err;
@@ -105,6 +111,7 @@ export const createProduct = (
   return async (dispatch, getState) => {
     //async code to server
     const token = getState().auth.token;
+    const userId = getState().auth.userId;
     const response = await fetch(
       `https://the-shop-app-a940e-default-rtdb.firebaseio.com/products.json?auth=${token}`,
       {
@@ -117,6 +124,7 @@ export const createProduct = (
           description,
           imageUrl,
           price,
+          ownerId: userId,
         }),
       }
     );
@@ -127,7 +135,7 @@ export const createProduct = (
 
     dispatch({
       type: CREATE_PRODUCT,
-      productData: { id: resData.name, title, description, imageUrl, price },
+      productData: { id: resData.name, title, description, imageUrl, price, ownerId: userId },
     });
   };
 };
@@ -162,6 +170,10 @@ export const updateProduct = (
     if (!response.ok) {
       throw new Error('Update failed');
     }
-    dispatch({ type: UPDATE_PRODUCT, pid: id, productData: { title, description, imageUrl } });
+    dispatch({
+      type: UPDATE_PRODUCT,
+      pid: id,
+      productData: { title, description, imageUrl },
+    });
   };
 };
