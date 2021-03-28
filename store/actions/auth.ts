@@ -1,20 +1,19 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppThunk } from '../../App';
 
-export const SIGN_UP = 'SIGN_UP';
-export const LOG_IN = 'LOG_IN';
-interface SignUpAction {
-  type: typeof SIGN_UP;
+export const AUTHENTICATE = 'AUTHENTICATE';
+
+interface AuthenticateAction {
+  type: typeof AUTHENTICATE;
   token: string;
   userId: string;
 }
 
-interface LogInAction {
-  type: typeof LOG_IN;
-  token: string;
-  userId: string;
-}
+export type AuthActionType = AuthenticateAction;
 
-export type AuthActionType = LogInAction | SignUpAction;
+export const authenticate = (userId: string, token: string) => {
+  return { type: AUTHENTICATE, userId: userId, token: token };
+};
 
 export const signUp = (email: string, password: string): AppThunk<void> => {
   return async (dispatch) => {
@@ -47,7 +46,9 @@ export const signUp = (email: string, password: string): AppThunk<void> => {
         }
         throw new Error(message);
       }
-      dispatch({ type: SIGN_UP, token: resData.idToken, userId: resData.localId });
+      dispatch(authenticate(resData.localId, resData.idToken));
+      const expirationDate = new Date(new Date().getTime() + parseInt(resData.expiresIn) * 1000);
+      saveDataToStorage(resData.idToken, resData.localId, expirationDate);
     } catch (err) {
       throw err;
     }
@@ -85,9 +86,22 @@ export const logIn = (email: string, password: string): AppThunk<void> => {
         }
         throw new Error(message);
       }
-      dispatch({ type: LOG_IN, token: resData.idToken, userId: resData.localId });
+      dispatch(authenticate(resData.localId, resData.idToken));
+      const expirationDate = new Date(new Date().getTime() + parseInt(resData.expiresIn) * 1000);
+      saveDataToStorage(resData.idToken, resData.localId, expirationDate);
     } catch (err) {
       throw err;
     }
   };
+};
+
+const saveDataToStorage = (token: string, userId: string, expireDate: Date) => {
+  AsyncStorage.setItem(
+    'userData',
+    JSON.stringify({
+      token: token,
+      userId: userId,
+      expiryDate: expireDate.toISOString(),
+    })
+  );
 };
